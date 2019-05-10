@@ -26,6 +26,7 @@ namespace MyRedisDesktopManager.ViewModels
 		private string _password;
 		private int _timeout = 30;
 		private string _keySeparator;
+		private bool _allowAdmin;
 
 		public ICommand CloseCommand => new Command((s) => Close?.Invoke());
 
@@ -53,6 +54,14 @@ namespace MyRedisDesktopManager.ViewModels
 		public int Timeout { get => _timeout; set { _timeout = value; OnPropertyChanged(); } }
 
 		public string KeySeparator { get => _keySeparator; set => _keySeparator = value; }
+
+		public bool AllowAdmin
+		{
+			get { return _allowAdmin; }
+			set { _allowAdmin = value; OnPropertyChanged(); }
+		}
+
+
 
 		public string Error => string.Empty;
 
@@ -95,6 +104,7 @@ namespace MyRedisDesktopManager.ViewModels
 					Port = this.Port,
 					Password = this.Password,
 					Timeout = this.Timeout,
+					AllowAdmin = this.AllowAdmin,
 				});
 			}
 			else
@@ -107,6 +117,7 @@ namespace MyRedisDesktopManager.ViewModels
 					Port = this.Port,
 					Password = this.Password,
 					Timeout = this.Timeout,
+					AllowAdmin = this.AllowAdmin,
 				});
 			}
 
@@ -154,6 +165,7 @@ namespace MyRedisDesktopManager.ViewModels
 						Port = this.Port,
 						Password = this.Password,
 						Timeout = this.Timeout,
+						AllowAdmin = this.AllowAdmin,
 					});
 
 					if (result)

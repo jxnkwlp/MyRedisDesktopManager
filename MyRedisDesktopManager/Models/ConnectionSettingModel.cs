@@ -20,6 +20,8 @@ namespace MyRedisDesktopManager.Models
 
 		public int Timeout { get; set; } = 30;
 
+		public bool AllowAdmin { get; set; }
+
 		public override string ToString()
 		{
 			return $"[{Name}][{Guid.ToString()}]";

@@ -31,6 +31,18 @@ namespace MyRedisDesktopManager.Services
 			}
 		}
 
+		public void Remove(Guid guid)
+		{
+			lock (_key)
+			{
+				var temp = _cache.FirstOrDefault(t => t.Guid == guid);
+
+				_cache.Remove(temp);
+
+				Save();
+			}
+		}
+
 		public void Update(ConnectionSettingModel model)
 		{
 			lock (_key)
@@ -41,6 +53,7 @@ namespace MyRedisDesktopManager.Services
 				temp.Password = model.Password;
 				temp.Port = model.Port;
 				temp.Timeout = model.Timeout;
+				temp.AllowAdmin = model.AllowAdmin;
 
 				Save();
 			}

@@ -2,6 +2,7 @@
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -29,16 +30,39 @@ namespace MyRedisDesktopManager.Services
 			var options = new ConfigurationOptions()
 			{
 				Password = settings.Password,
-				ConnectTimeout = settings.Timeout,
-				//AllowAdmin = true,
+				ConnectTimeout = settings.Timeout * 1000, // ms 
+				AsyncTimeout = settings.Timeout * 1000, // ms
+
+
+				AllowAdmin = settings.AllowAdmin,
 				ClientName = "MYRDM",
+				AbortOnConnectFail = false,
+
+				ConnectRetry = 10,
 			};
 
 			options.EndPoints.Add(settings.Host, settings.Port);
 
 			ConnectionMultiplexer connection = await ConnectionMultiplexer.ConnectAsync(options);
 
+			connection.ConnectionFailed += (sender, e) =>
+			{
+				Debug.WriteLine(e.Exception.ToString());
+
+			};
+
 			var isConnected = connection.IsConnected;
+
+			if (!isConnected)
+			{
+				await Task.Delay(TimeSpan.FromSeconds(1.5));
+
+				var server = connection.GetServer(connection.GetEndPoints().First());
+
+				var ping = await server.PingAsync();
+
+				isConnected = connection.IsConnected;
+			}
 
 			if (save)
 				_connections[settings.Guid] = connection;
@@ -48,6 +72,15 @@ namespace MyRedisDesktopManager.Services
 			}
 
 			return isConnected;
+		}
+
+		public async Task CloseConnectionAsync(Guid guid)
+		{
+			var client = GetClient(guid);
+			if (client.IsConnected || client.IsConnecting)
+			{
+				await client.CloseAsync();
+			}
 		}
 
 
@@ -75,6 +108,16 @@ namespace MyRedisDesktopManager.Services
 			var keys = server.Keys(db, pattern);
 
 			return keys.Select(t => t.ToString()).OrderBy(t => t).ToArray();
+		}
+
+
+		public async Task FlushDatabaseAsync(Guid guid, int db)
+		{
+			var client = GetClient(guid);
+
+			var server = client.GetServer(client.GetEndPoints()[0]);
+
+			await server.FlushDatabaseAsync(db);
 		}
 	}
 }

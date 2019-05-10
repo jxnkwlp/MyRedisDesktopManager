@@ -10,6 +10,7 @@ namespace MyRedisDesktopManager.Services
 	public class RedisService
 	{
 		private readonly RedisClientService _redisClientService = new RedisClientService();
+		private readonly SettingsService _settingsService = new SettingsService();
 
 		const string SPLITTER = ":";
 
@@ -27,6 +28,11 @@ namespace MyRedisDesktopManager.Services
 			return connected;
 		}
 
+		public async Task CloseConnectionAsync(RedisConnectModel connection)
+		{
+			await _redisClientService.CloseConnectionAsync(connection.Guid);
+		}
+
 		public IList<RedisDbModel> GetRedisDbs(RedisConnectModel connect)
 		{
 			var count = _redisClientService.GetDatabaseCount(connect.Guid);
@@ -40,19 +46,29 @@ namespace MyRedisDesktopManager.Services
 		}
 
 
-		public (long, IList<RedisDbKeyModel>) GetKeys(Guid guid, int db)
+		public async Task<(long, IList<RedisDbKeyModel>)> GetKeysAsync(Guid guid, int db)
 		{
-			var keys = _redisClientService.ScanKeys(guid, db);
-			var list = keys.Select(t => SplitKeys(t)).ToList();
-
-			var result = new List<RedisDbKeyModel>();
-
-			foreach (var key in list)
+			var keys = await Task.Run<IList<string>>(() =>
 			{
-				ResolveKeys(key, result);
-			}
+				return _redisClientService.ScanKeys(guid, db);
+			});
 
-			return (keys.Count, result);
+			var list = await Task.Run<List<RedisDbKeyModel>>(() =>
+			{
+				var temp = keys.Select(t => SplitKeys(t)).ToList();
+
+				var result = new List<RedisDbKeyModel>();
+
+				foreach (var key in temp)
+				{
+					ResolveKeys(key, result);
+				}
+
+				return result;
+			});
+
+
+			return (keys.Count, list);
 		}
 
 		public void ResolveKeys(RedisDbKeyModel key, IList<RedisDbKeyModel> keys)
@@ -140,6 +156,16 @@ namespace MyRedisDesktopManager.Services
 			key.Childrens.Add(nextKey);
 
 			ResolveKey(nextKey);
+		}
+
+		public void RemoveConnection(RedisConnectModel model)
+		{
+			_settingsService.Remove(model.Guid);
+		}
+
+		public async Task FlushDBAsync(RedisDbModel db)
+		{
+			await _redisClientService.FlushDatabaseAsync(db.RedisConnect.Guid, db.Index);
 		}
 	}
 }

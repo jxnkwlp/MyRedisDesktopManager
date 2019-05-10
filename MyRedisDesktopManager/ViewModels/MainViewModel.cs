@@ -26,14 +26,34 @@ namespace MyRedisDesktopManager.ViewModels
 
 		public ICommand AppSettingCommand => new Command(async (s) => await AppSettingAsync());
 
-		public ICommand ConnectionClosedCommand => new Command(async (s) => await ConnectionClosed());
 
-		public ICommand ConnectionEditCommand => new Command(async (s) => await ConnectionEditAsync(s));
+		#region Connection Context Menu Command 
 
-		public ICommand ConnectionDeleteCommand => new Command(async (s) => await ConnectionDelete());
+		public ICommand DatabaseReloadCommand => new Command<RedisConnectModel>(async (p) => await DatabaseReloadAsync(p));
 
+		public ICommand ConnectionClosedCommand => new Command<RedisConnectModel>(async (p) => await ConnectionClosedAsync(p));
+
+		public ICommand ConnectionEditCommand => new Command<RedisConnectModel>(async (p) => await ConnectionEditAsync(p));
+
+		public ICommand ConnectionDeleteCommand => new Command<RedisConnectModel>(async (p) => await ConnectionDeleteAsync(p));
+
+		#endregion
+
+		#region Database Context Menu Command 
+
+		public ICommand DBReloadCommand => new Command<RedisDbModel>(async (p) => await DBReloadCommandExecuteAsync(p));
+
+		public ICommand DBKeyFilterCommand => new Command<RedisDbModel>(async (p) => await DBKeyFilterCommandExecute(p));
+
+		public ICommand DBAddKeyCommand => new Command<RedisDbModel>(async (p) => await DBAddKeyCommandExecute(p));
+
+		public ICommand DBFlushCommand => new Command<RedisDbModel>(async (p) => await DBFlushCommandExecute(p));
+
+		#endregion
 
 		public ICommand TreeviewSelectedItemChangedCommand => new Command(async (s) => await TreeviewSelectedItemChangedAsync(s));
+
+
 
 
 		public object SelectedValuePath
@@ -102,6 +122,7 @@ namespace MyRedisDesktopManager.ViewModels
 						Password = model.ConnectionSetting.Password,
 						Port = model.ConnectionSetting.Port,
 						Timeout = model.ConnectionSetting.Timeout,
+						AllowAdmin = model.ConnectionSetting.AllowAdmin,
 
 						Close = async () => { await _dialogCoordinator.HideMetroDialogAsync(this, dialog); LoadRedisConnects(); }
 					}
@@ -117,77 +138,166 @@ namespace MyRedisDesktopManager.ViewModels
 
 		}
 
-		private Task ConnectionDelete()
+		private async Task ConnectionDeleteAsync(RedisConnectModel model)
 		{
-			throw new NotImplementedException();
+			var dialog = await _dialogCoordinator.ShowMessageAsync(this, "Connection Delete", "Are you sure delete the connection?", style: MessageDialogStyle.AffirmativeAndNegative);
+
+			if (dialog == MessageDialogResult.Affirmative)
+			{
+				if (model.IsConnection)
+				{
+					await _redisService.CloseConnectionAsync(model);
+				}
+
+				_redisService.RemoveConnection(model);
+
+				Connects.Remove(model);
+			}
+
 		}
 
-		private Task ConnectionClosed()
+		private async Task ConnectionClosedAsync(RedisConnectModel model)
 		{
-			throw new NotImplementedException();
+			if (model.IsConnection)
+			{
+				await _redisService.CloseConnectionAsync(model);
+
+				model.IsConnection = false;
+				model.Databases.Clear();
+			}
+
 		}
 
 		private async Task TreeviewSelectedItemChangedAsync(object o)
 		{
 			if (o is RedisConnectModel redisConnect)
 			{
-				if (!redisConnect.IsConnection)
-				{
-					redisConnect.IsLoading = true;
-
-					try
-					{
-						var result = await _redisService.ConnectionAsync(redisConnect);
-
-						if (result)
-						{
-							redisConnect.IsConnection = true;
-
-							// 
-							LoadDatabase(redisConnect);
-						}
-
-					}
-					catch (Exception ex)
-					{
-						await _dialogCoordinator.ShowMessageAsync(this, "Connection", ex.Message);
-					}
-
-					redisConnect.IsLoading = false;
-				}
-				else { }
+				await LoadDatabaseAsync(redisConnect);
 			}
 			else if (o is RedisDbModel db)
 			{
-				if (db.HasLoadChidren)
-					return;
+				await LoadDBKeysAsync(db);
+			}
+		}
 
-				db.IsLoading = true;
+		private async Task LoadDatabaseAsync(RedisConnectModel connect, bool focus = false)
+		{
+			if (!connect.IsConnection || focus)
+			{
+				connect.IsLoading = true;
 
 				try
 				{
-					var keys = _redisService.GetKeys(db.RedisConnect.Guid, db.Index);
+					var result = await _redisService.ConnectionAsync(connect);
 
-					db.KeyCount = keys.Item1;
+					if (result)
+					{
+						connect.IsConnection = true;
 
-					db.Keys.ReplaceRange(keys.Item2);
+						// get database 
+						var dbList = _redisService.GetRedisDbs(connect);
 
-					db.HasLoadChidren = true;
+						// replace list 
+						connect.Databases.ReplaceRange(dbList);
+					}
+
 				}
 				catch (Exception ex)
 				{
-					await _dialogCoordinator.ShowMessageAsync(this, "Load DB Keys", ex.Message);
+					await _dialogCoordinator.ShowMessageAsync(this, "Connection", ex.Message);
+				}
+
+				connect.IsLoading = false;
+			}
+
+
+		}
+
+		private async Task LoadDBKeysAsync(RedisDbModel db, bool focus = false)
+		{
+			if (db.HasLoadChidren && !focus)
+				return;
+
+			db.IsLoading = true;
+
+			try
+			{
+				if (db.Keys.Count > 0)
+				{
+					db.Keys.Clear();
+				}
+
+				var keys = await _redisService.GetKeysAsync(db.RedisConnect.Guid, db.Index);
+
+				db.KeyCount = keys.Item1;
+				db.HasLoadChidren = true;
+
+				db.Keys.ReplaceRange(keys.Item2);
+
+			}
+			catch (Exception ex)
+			{
+				await _dialogCoordinator.ShowMessageAsync(this, "Load DB Keys", ex.Message);
+			}
+
+			db.IsLoading = false;
+		}
+
+
+		private async Task DatabaseReloadAsync(RedisConnectModel model)
+		{
+			await LoadDatabaseAsync(model, true);
+		}
+
+
+		private async Task DBReloadCommandExecuteAsync(RedisDbModel db)
+		{
+			await LoadDBKeysAsync(db, true);
+		}
+
+		private async Task DBKeyFilterCommandExecute(RedisDbModel db)
+		{
+			throw new NotImplementedException();
+		}
+
+		private async Task DBAddKeyCommandExecute(RedisDbModel db)
+		{
+			throw new NotImplementedException();
+		}
+
+		private async Task DBFlushCommandExecute(RedisDbModel db)
+		{
+			//if (!db.RedisConnect.ConnectionSetting.AllowAdmin)
+			//{
+			//	await _dialogCoordinator.ShowMessageAsync(this, "Action Result", "Only admin can do flush database.");
+
+			//	return;
+			//}
+
+			var dialog = await _dialogCoordinator.ShowMessageAsync(this, "Confirm Action", "Are you sure flush all keys ?", style: MessageDialogStyle.AffirmativeAndNegative);
+
+			if (dialog == MessageDialogResult.Affirmative)
+			{
+				db.IsLoading = true;
+
+				if (db.HasLoadChidren)
+				{
+					db.Keys.Clear();
+				}
+
+				db.HasLoadChidren = false;
+
+				try
+				{
+					await _redisService.FlushDBAsync(db);
+				}
+				catch (Exception ex)
+				{
+					await _dialogCoordinator.ShowMessageAsync(this, "Action Result", ex.Message);
 				}
 
 				db.IsLoading = false;
 			}
-		}
-
-		private void LoadDatabase(RedisConnectModel connect)
-		{
-			var dbList = _redisService.GetRedisDbs(connect);
-
-			connect.Databases.ReplaceRange(dbList);
 		}
 
 	}

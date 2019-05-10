@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+	xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
              xmlns:local="clr-namespace:MyRedisDesktopManager.Views"
 			xmlns:rules="clr-namespace:MyRedisDesktopManager.ValidationRules"
              xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" 
@@ -39,22 +40,24 @@
 		<Button Content="Close" Margin="0,10,10,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right" Width="75" Command="{Binding CloseCommand}"/>
 		<Button Content="Save" Margin="0,10,90,0" Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Right" Width="75"  Command="{Binding SaveCommand}"/>
 
-		<Label Content="Name:" HorizontalAlignment="Left" Margin="10,10,0,218.76" Width="75.79" HorizontalContentAlignment="Right"/>
-		<Label Content="Password:" HorizontalAlignment="Left" Margin="10,70.48,0,0" VerticalAlignment="Top" Width="75.79" HorizontalContentAlignment="Right"/>
-		<Label Content="Host:" HorizontalAlignment="Left" Margin="10,40.24,0,0" VerticalAlignment="Top" Width="75.79"  HorizontalContentAlignment="Right"/>
-		<TextBox Height="23" Margin="90.79,9.24,10,0" VerticalAlignment="Top" VerticalContentAlignment="Center">
+		<Label Content="Name:" HorizontalAlignment="Left" Margin="10,10,0,219" Width="87" HorizontalContentAlignment="Right"/>
+		<Label Content="Password:" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top" Width="87" HorizontalContentAlignment="Right"/>
+		<Label Content="Host:" HorizontalAlignment="Left" Margin="10,40,0,0" VerticalAlignment="Top" Width="87"  HorizontalContentAlignment="Right"/>
+		<TextBox Height="23" Margin="102,9,10,0" VerticalAlignment="Top" VerticalContentAlignment="Center">
 			<TextBox.Text>
 				<Binding Path="Name" NotifyOnValidationError="True" ValidatesOnDataErrors="True" UpdateSourceTrigger="LostFocus">
 				</Binding>
 			</TextBox.Text>
 		</TextBox>
-		<TextBox Height="23" Text="{Binding Path=Host, ValidatesOnDataErrors=True, NotifyOnValidationError=True, UpdateSourceTrigger=LostFocus}" Margin="90.79,40.24,167,0"  VerticalAlignment="Top" VerticalContentAlignment="Center"/>
-		<TextBox Height="23" Text="{Binding Path=Password, ValidatesOnDataErrors=True, NotifyOnValidationError=True, UpdateSourceTrigger=LostFocus}" Margin="90.79,70.48,10,0"  VerticalAlignment="Top" VerticalContentAlignment="Center"/>
+		<TextBox Height="23" Text="{Binding Path=Host, ValidatesOnDataErrors=True, NotifyOnValidationError=True, UpdateSourceTrigger=LostFocus}" Margin="102,40,163,0"  VerticalAlignment="Top" VerticalContentAlignment="Center"/>
+		<TextBox Height="23" Text="{Binding Path=Password, ValidatesOnDataErrors=True, NotifyOnValidationError=True, UpdateSourceTrigger=LostFocus}" Margin="102,70,10,0"  VerticalAlignment="Top" VerticalContentAlignment="Center"/>
 		<Label Content="Port:" Margin="0,40.24,123.21,0" VerticalAlignment="Top" HorizontalContentAlignment="Right" HorizontalAlignment="Right" Width="38.79"/>
 		<mah:NumericUpDown Margin="391.79,39.48,10,0" VerticalAlignment="Top" Height="19.333" Value="{Binding Path=Port, ValidatesOnDataErrors=True, NotifyOnValidationError=True, UpdateSourceTrigger=LostFocus}"  HorizontalContentAlignment="Center"/>
-		<Label Content="Timeout:" HorizontalAlignment="Left" Margin="10,133,0,0" VerticalAlignment="Top" Width="75.79" HorizontalContentAlignment="Right"/>
-		<Label Content="分隔符:" HorizontalAlignment="Left" Margin="10,163.24,0,0" VerticalAlignment="Top" Width="75.79" HorizontalContentAlignment="Right"/>
-		<TextBox HorizontalAlignment="Left"  Text="{Binding Path=KeySeparator, ValidatesOnDataErrors=True, NotifyOnValidationError=True, UpdateSourceTrigger=LostFocus}" Height="23" Margin="90.79,162.48,0,0"  VerticalAlignment="Top" Width="160" VerticalContentAlignment="Center"/>
-		<mah:NumericUpDown HorizontalAlignment="Left" Margin="90.79,131.48,0,0" VerticalAlignment="Top" Width="160" Value="{Binding Path=Timeout, ValidatesOnDataErrors=True, NotifyOnValidationError=True, UpdateSourceTrigger=LostFocus}" HorizontalContentAlignment="Center"/>
+		<Label Content="Timeout:" HorizontalAlignment="Left" Margin="10,133,0,0" VerticalAlignment="Top" Width="87" HorizontalContentAlignment="Right"/>
+		<Label Content="分隔符:" HorizontalAlignment="Left" Margin="10,163,0,0" VerticalAlignment="Top" Width="87" HorizontalContentAlignment="Right"/>
+		<TextBox HorizontalAlignment="Left"  Text="{Binding Path=KeySeparator, ValidatesOnDataErrors=True, NotifyOnValidationError=True, UpdateSourceTrigger=LostFocus}" Height="23" Margin="102,163,0,0"  VerticalAlignment="Top" Width="160" VerticalContentAlignment="Center"/>
+		<mah:NumericUpDown HorizontalAlignment="Left" Margin="102,131,0,0" VerticalAlignment="Top" Width="156" Value="{Binding Path=Timeout, ValidatesOnDataErrors=True, NotifyOnValidationError=True, UpdateSourceTrigger=LostFocus}" HorizontalContentAlignment="Center"/>
+		<Label Content="Allow Admin:" HorizontalAlignment="Left" Margin="10,196,0,0" VerticalAlignment="Top" Width="87" HorizontalContentAlignment="Right"/>
+		<CheckBox Content="Yes" Margin="102,196,0,0" HorizontalAlignment="Left" Width="100" Height="25" VerticalAlignment="Top"  IsChecked="{Binding Path=AllowAdmin}"  />
 	</Grid>
 </UserControl>

@@ -35,8 +35,9 @@
 
 
 
-		<Grid Grid.Column="0">
-			<TreeView Name="myTree" ItemsSource="{Binding Connects}"  >
+		<Grid Grid.Column="0" Margin="0,0,6,0">
+			
+			<TreeView Name="myTree" ItemsSource="{Binding Connects}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"  >
 
 				<i:Interaction.Triggers>
 					<i:EventTrigger EventName="MouseDoubleClick">
@@ -72,6 +73,8 @@
 							<!--  连接 右键菜单 -->
 							<StackPanel.ContextMenu>
 								<ContextMenu DataContext="{Binding RelativeSource={RelativeSource Self}, Path=PlacementTarget.Tag}" >
+									<!--<MenuItem Header="Reload" Command="{Binding DatabaseReloadCommand}"  CommandParameter="{Binding Path=PlacementTarget.TemplatedParent.TemplatedParent.DataContext, 
+                           RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}" />-->
 									<MenuItem Header="Close Connection" Command="{Binding ConnectionClosedCommand}"  CommandParameter="{Binding Path=PlacementTarget.TemplatedParent.TemplatedParent.DataContext, 
                            RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}"/>
 									<MenuItem Header="Edit Connection"  Command="{Binding ConnectionEditCommand }" CommandParameter="{Binding Path=PlacementTarget.TemplatedParent.TemplatedParent.DataContext, 
@@ -86,7 +89,7 @@
 							<HierarchicalDataTemplate ItemsSource="{Binding Path=Keys}">
 
 								<!--  DB  -->
-								<StackPanel Orientation="Horizontal"  Margin="0,4,0,4">
+								<StackPanel x:Name="DBItem" Orientation="Horizontal"  Margin="0,4,0,4">
 									<icon:PackIconFontAwesome Kind="SpinnerSolid" Height="24" Margin="0,0,6,0" Spin="True" Foreground="DarkGray" Visibility="{Binding Path=IsLoading, Converter={StaticResource booleanToVisibilityConverter}}" ></icon:PackIconFontAwesome>
 									<icon:PackIconFontAwesome Kind="DatabaseSolid" Height="24"  Margin="0,0,6,0" >
 										<icon:PackIconFontAwesome.Style>
@@ -110,15 +113,12 @@
 
 									<!--  DB 右键菜单 -->
 									<StackPanel.ContextMenu>
-										<ContextMenu DataContext="{Binding RelativeSource={RelativeSource Self}, Path=PlacementTarget.Tag}" >
-											<MenuItem Header="Reload" Command="{Binding ConnectionClosedCommand}"  CommandParameter="{Binding Path=PlacementTarget.TemplatedParent.TemplatedParent.TemplatedParent.DataContext, 
-                           RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}"/>
-											<MenuItem Header="Filter Keys"  Command="{Binding ConnectionEditCommand }" CommandParameter="{Binding Path=PlacementTarget.TemplatedParent.TemplatedParent.TemplatedParent.DataContext, 
-                           RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}" ></MenuItem>
-											<MenuItem Header="Add Key"  Command="{Binding ConnectionDeleteCommand }"  CommandParameter="{Binding Path=PlacementTarget.TemplatedParent.TemplatedParent.TemplatedParent.DataContext, 
-                           RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}"></MenuItem>
-											<MenuItem Header="Flush DB"  Command="{Binding ConnectionDeleteCommand }"  CommandParameter="{Binding Path=PlacementTarget.TemplatedParent.TemplatedParent.TemplatedParent.DataContext, 
-                           RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}"></MenuItem>
+										<ContextMenu DataContext="{Binding Source={x:Reference myTree}, Path=DataContext}" >
+											
+											<MenuItem Header="Reload" Command="{Binding DBReloadCommand}" CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}" />
+											<MenuItem Header="Filter Keys"  Command="{Binding DBKeyFilterCommand}" CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}" />
+											<MenuItem Header="Add Key"  Command="{Binding DBAddKeyCommand}" CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}" />
+											<MenuItem Header="Flush DB"  Command="{Binding DBFlushCommand}" CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}" />
 										</ContextMenu>
 									</StackPanel.ContextMenu>
 								</StackPanel>
@@ -148,7 +148,9 @@
 			</TreeView>
  
 		</Grid>
-		<GridSplitter Width="10"></GridSplitter>
+		
+		<GridSplitter Width="6"></GridSplitter>
+		
 		<Grid Grid.Column="1" Margin="0">
 			<TextBlock Text="222"></TextBlock>
 
