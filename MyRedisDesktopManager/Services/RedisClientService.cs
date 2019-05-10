@@ -114,10 +114,43 @@ namespace MyRedisDesktopManager.Services
 		public async Task FlushDatabaseAsync(Guid guid, int db)
 		{
 			var client = GetClient(guid);
-
 			var server = client.GetServer(client.GetEndPoints()[0]);
 
 			await server.FlushDatabaseAsync(db);
 		}
+
+		public async Task<RedisDbKeyValueModel> GetKeyValueAsync(Guid guid, int db, string fullKey)
+		{
+			var client = GetClient(guid);
+			var server = client.GetServer(client.GetEndPoints()[0]);
+			var database = client.GetDatabase(db);
+
+			var keyType = await database.KeyTypeAsync(fullKey);
+
+			var result = new RedisDbKeyValueModel()
+			{
+				RedisType = (Models.RedisType)keyType,
+				Key = fullKey,
+			};
+
+			if (result.RedisType != Models.RedisType.None && result.RedisType != Models.RedisType.Unknown)
+			{
+				switch (result.RedisType)
+				{
+					case Models.RedisType.String:
+
+						var value = await database.StringGetAsync(fullKey);
+						var liveTime = await database.KeyTimeToLiveAsync(fullKey);
+
+						result.Value = value;
+						result.TTL = liveTime.HasValue ? liveTime.Value.TotalSeconds : -1;
+
+						break;
+				}
+			}
+
+			return result;
+		}
 	}
+
 }

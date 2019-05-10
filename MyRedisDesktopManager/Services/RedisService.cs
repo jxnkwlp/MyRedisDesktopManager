@@ -46,16 +46,16 @@ namespace MyRedisDesktopManager.Services
 		}
 
 
-		public async Task<(long, IList<RedisDbKeyModel>)> GetKeysAsync(Guid guid, int db)
+		public async Task<(long, IList<RedisDbKeyModel>)> GetKeysAsync(Guid guid, RedisDbModel db)
 		{
-			var keys = await Task.Run<IList<string>>(() =>
+			var keys = await Task.Run(() =>
 			{
-				return _redisClientService.ScanKeys(guid, db);
+				return _redisClientService.ScanKeys(guid, db.Index);
 			});
 
-			var list = await Task.Run<List<RedisDbKeyModel>>(() =>
+			var list = await Task.Run(() =>
 			{
-				var temp = keys.Select(t => SplitKeys(t)).ToList();
+				var temp = keys.Select(t => SplitKeys(db, t)).ToList();
 
 				var result = new List<RedisDbKeyModel>();
 
@@ -93,12 +93,12 @@ namespace MyRedisDesktopManager.Services
 		/// <summary>
 		///  分割 key
 		/// </summary> 
-		static RedisDbKeyModel SplitKeys(string key)
+		static RedisDbKeyModel SplitKeys(RedisDbModel db, string key)
 		{
 			if (key.IndexOf(SPLITTER) > 0)
 			{
 				var name = key.Substring(0, key.IndexOf(SPLITTER));
-				var keyModel = new RedisDbKeyModel()
+				var keyModel = new RedisDbKeyModel(db)
 				{
 					FullKey = key,
 					Name = name,
@@ -111,7 +111,7 @@ namespace MyRedisDesktopManager.Services
 			}
 			else
 			{
-				return new RedisDbKeyModel()
+				return new RedisDbKeyModel(db)
 				{
 					FullKey = key,
 					Name = key,
@@ -121,13 +121,16 @@ namespace MyRedisDesktopManager.Services
 
 		}
 
-		static void ResolveKey(RedisDbKeyModel key)
+		static void ResolveKey(RedisDbKeyModel currentKey)
 		{
-			var fullKey = key.FullKey;
-			if (fullKey == key.KeyPrefix)
+			if (currentKey == null)
+				throw new ArgumentNullException(nameof(currentKey));
+
+			var fullKey = currentKey.FullKey;
+			if (fullKey == currentKey.KeyPrefix)
 				return;
 
-			var currentPrefix = key.KeyPrefix;
+			var currentPrefix = currentKey.KeyPrefix;
 
 			var nextSplitterIndex = fullKey.IndexOf(SPLITTER, currentPrefix.Length + 1);
 
@@ -146,14 +149,14 @@ namespace MyRedisDesktopManager.Services
 				nextName = nextPrefix.Remove(0, currentPrefix.Length + 1);
 			}
 
-			var nextKey = new RedisDbKeyModel()
+			var nextKey = new RedisDbKeyModel(currentKey.RedisDb)
 			{
-				FullKey = key.FullKey,
+				FullKey = currentKey.FullKey,
 				KeyPrefix = nextPrefix,
 				Name = nextName,
 			};
 
-			key.Childrens.Add(nextKey);
+			currentKey.Childrens.Add(nextKey);
 
 			ResolveKey(nextKey);
 		}
@@ -166,6 +169,17 @@ namespace MyRedisDesktopManager.Services
 		public async Task FlushDBAsync(RedisDbModel db)
 		{
 			await _redisClientService.FlushDatabaseAsync(db.RedisConnect.Guid, db.Index);
+		}
+
+		public async Task<RedisDbKeyValueModel> GetKeyValueAsync(RedisDbKeyModel key)
+		{
+			var db = key.RedisDb;
+
+			var value = await _redisClientService.GetKeyValueAsync(db.RedisConnect.Guid, db.Index, key.FullKey);
+
+			value.RedisDbKey = key;
+
+			return value;
 		}
 	}
 }

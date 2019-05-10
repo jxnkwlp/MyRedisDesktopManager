@@ -9,6 +9,8 @@ namespace MyRedisDesktopManager.Models
 {
 	public class RedisDbKeyModel : INotifyPropertyChanged
 	{
+		public RedisDbModel RedisDb { get; set; }
+
 		public string Name { get; set; }
 
 		public string KeyPrefix { get; set; }
@@ -36,6 +38,12 @@ namespace MyRedisDesktopManager.Models
 				if (Childrens == null) return 0;
 				return Childrens.Count;
 			}
+		}
+
+
+		public RedisDbKeyModel(RedisDbModel dbModel)
+		{
+			this.RedisDb = dbModel;
 		}
 
 		public event PropertyChangedEventHandler PropertyChanged;

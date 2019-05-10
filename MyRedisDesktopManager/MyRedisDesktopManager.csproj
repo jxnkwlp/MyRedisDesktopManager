@@ -114,8 +114,10 @@
     <Compile Include="Converters\NotZeroToVisibilityConverter.cs" />
     <Compile Include="Models\ConnectionSettingModel.cs" />
     <Compile Include="Models\RedisDbKeyModel.cs" />
+    <Compile Include="Models\RedisDbKeyValueModel.cs" />
     <Compile Include="Models\RedisDbModel.cs" />
     <Compile Include="Models\RedisConnectModel.cs" />
+    <Compile Include="Models\RedisKeyType.cs" />
     <Compile Include="ObservableRangeCollection.cs" />
     <Compile Include="Services\RedisClientService.cs" />
     <Compile Include="Services\RedisService.cs" />
@@ -128,6 +130,7 @@
     <Compile Include="Validators\AddConnectionValidator.cs" />
     <Compile Include="Validators\ValidatorExtensions.cs" />
     <Compile Include="ViewModels\EditConnectionViewModel.cs" />
+    <Compile Include="ViewModels\KeyEditViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
     <Compile Include="Views\EditConnectionView.xaml.cs">

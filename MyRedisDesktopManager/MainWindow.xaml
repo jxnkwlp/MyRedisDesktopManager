@@ -29,14 +29,14 @@
 	<!--Content-->
 	<Grid>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="300" MinWidth="200"/>
+			<ColumnDefinition Width="300"  MinWidth="300" />
 			<ColumnDefinition Width="*" MinWidth="200"/>
 		</Grid.ColumnDefinitions>
 
 
 
 		<Grid Grid.Column="0" Margin="0,0,6,0">
-			
+
 			<TreeView Name="myTree" ItemsSource="{Binding Connects}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"  >
 
 				<i:Interaction.Triggers>
@@ -52,7 +52,7 @@
 						<StackPanel Orientation="Horizontal" Margin="0,8,0,8" Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type TreeView}}}">
 							<icon:PackIconFontAwesome Kind="ServerSolid" Height="24" Margin="8,0,8,0">
 								<icon:PackIconFontAwesome.Style>
-									<Style TargetType="icon:PackIconFontAwesome"> 
+									<Style TargetType="icon:PackIconFontAwesome">
 										<Style.Triggers>
 											<DataTrigger Binding="{Binding IsConnection}" Value="true">
 												<Setter Property="Foreground" Value="#333"/>
@@ -114,7 +114,7 @@
 									<!--  DB 右键菜单 -->
 									<StackPanel.ContextMenu>
 										<ContextMenu DataContext="{Binding Source={x:Reference myTree}, Path=DataContext}" >
-											
+
 											<MenuItem Header="Reload" Command="{Binding DBReloadCommand}" CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}" />
 											<MenuItem Header="Filter Keys"  Command="{Binding DBKeyFilterCommand}" CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}" />
 											<MenuItem Header="Add Key"  Command="{Binding DBAddKeyCommand}" CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}" />
@@ -129,10 +129,10 @@
 											<icon:PackIconFontAwesome Kind="PaperclipSolid" Height="24" Foreground="LightGray"  Margin="0,0,6,0" Visibility="{Binding Path=HasChildren, Converter={StaticResource invertedBooleanToVisibilityConverter}}" />
 
 											<icon:PackIconFontAwesome Kind="FolderRegular" Height="24"  Foreground="LightGray"  Margin="0,0,6,0"  Visibility="{Binding Path=HasChildren, Converter={StaticResource booleanToVisibilityConverter}}" />
-											
+
 											<TextBlock Text="{Binding Path=Name}" VerticalAlignment="Center"></TextBlock>
 											<TextBlock Text="{Binding Path=ChildrenCount, StringFormat='({0})'}" Visibility="{Binding Path=HasChildren, Converter={StaticResource booleanToVisibilityConverter}}" VerticalAlignment="Center" Margin="5,0,0,0" Foreground="SlateGray" FontSize="10"></TextBlock>
-											
+
 										</StackPanel>
 									</HierarchicalDataTemplate>
 								</HierarchicalDataTemplate.ItemTemplate>
@@ -146,16 +146,64 @@
 				</TreeView.ItemTemplate>
 
 			</TreeView>
- 
+
 		</Grid>
-		
-		<GridSplitter Width="6"></GridSplitter>
-		
+
+		<GridSplitter Width="6" />
+
 		<Grid Grid.Column="1" Margin="0">
-			<TextBlock Text="222"></TextBlock>
+			<Grid Margin="0">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="*" MinHeight="100"/>
+					<RowDefinition Height="auto"/>
+					<RowDefinition Height="100" MinHeight="100"/>
+				</Grid.RowDefinitions>
 
-			<Button Content="Button" HorizontalAlignment="Left" Margin="162,274,0,0" VerticalAlignment="Top" Width="75" Command="{Binding AddConnectionCommand}"/>
+				<Grid Grid.Row="0">
 
+					<Controls:MetroTabControl xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls" 
+								ItemsSource="{Binding Tabs}" 
+											  Controls:TabControlHelper.CloseButtonEnabled="True"
+												Controls:TabControlHelper.Underlined="TabPanel" >
+						<!--<TabControl.ItemContainerStyle>
+							<Style TargetType="{x:Type TabItem}">
+								<Setter Property="Header" Value="{Binding Title}" />
+							</Style>
+						</TabControl.ItemContainerStyle>-->
+
+						<!--<TabControl.ItemTemplate>
+							<DataTemplate>
+								<TextBlock Text="{Binding Title}"/>
+							</DataTemplate>
+						</TabControl.ItemTemplate>-->
+
+						<Controls:MetroTabControl.ItemTemplate>
+							<DataTemplate> 
+								<TextBlock Text="{Binding Title}"/>
+							</DataTemplate>
+						</Controls:MetroTabControl.ItemTemplate>
+
+						<TabControl.ContentTemplate>
+							<DataTemplate>
+								<TextBlock Text="{Binding KeyValue.Value}" />
+							</DataTemplate>
+						</TabControl.ContentTemplate>
+
+						<!--<Controls:MetroTabItem Header="111" CloseButtonEnabled="True" />
+						<Controls:MetroTabItem Header="2222"  CloseButtonEnabled="True"/>-->
+
+					</Controls:MetroTabControl>
+
+				</Grid>
+
+				<GridSplitter Height="6" Grid.Row="1"  HorizontalAlignment="Stretch"/>
+
+				<Grid Grid.Row="2">
+					<TextBlock Text="333"></TextBlock>
+				</Grid>
+
+
+			</Grid>
 
 		</Grid>
 

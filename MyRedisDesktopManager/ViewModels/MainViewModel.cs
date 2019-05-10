@@ -67,6 +67,8 @@ namespace MyRedisDesktopManager.ViewModels
 
 		public ObservableRangeCollection<RedisConnectModel> Connects { get; set; } = new ObservableRangeCollection<RedisConnectModel>();
 
+		public ObservableCollection<KeyEditViewModel> Tabs { get; set; } = new ObservableCollection<KeyEditViewModel>();
+
 
 		public MainViewModel()
 		{
@@ -178,6 +180,11 @@ namespace MyRedisDesktopManager.ViewModels
 			{
 				await LoadDBKeysAsync(db);
 			}
+			else if (o is RedisDbKeyModel key)
+			{
+				if (!key.HasChildren)
+					await LoadDBKeysValueAsync(key);
+			}
 		}
 
 		private async Task LoadDatabaseAsync(RedisConnectModel connect, bool focus = false)
@@ -227,7 +234,7 @@ namespace MyRedisDesktopManager.ViewModels
 					db.Keys.Clear();
 				}
 
-				var keys = await _redisService.GetKeysAsync(db.RedisConnect.Guid, db.Index);
+				var keys = await _redisService.GetKeysAsync(db.RedisConnect.Guid, db);
 
 				db.KeyCount = keys.Item1;
 				db.HasLoadChidren = true;
@@ -298,6 +305,28 @@ namespace MyRedisDesktopManager.ViewModels
 
 				db.IsLoading = false;
 			}
+		}
+
+		private async Task LoadDBKeysValueAsync(RedisDbKeyModel key)
+		{
+			var id = key.RedisDb.RedisConnect.Guid + ":" + key.FullKey;
+
+			if (this.Tabs.Any(t => t.Id == id))
+			{
+				return;
+			}
+
+			var value = await _redisService.GetKeyValueAsync(key);
+
+			var tabItem = new KeyEditViewModel()
+			{
+				Id = id,
+				Title = key.RedisDb.RedisConnect.ConnectionSetting.Name + ":" + key.FullKey,
+
+				KeyValue = value,
+			};
+
+			this.Tabs.Add(tabItem);
 		}
 
 	}
