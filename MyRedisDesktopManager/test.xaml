@@ -1,0 +1,124 @@
+﻿<Window x:Class="MyRedisDesktopManager.test"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:MyRedisDesktopManager"
+		xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+		xmlns:icon="http://metro.mahapps.com/winfx/xaml/iconpacks"
+        mc:Ignorable="d"
+        Title="test" Height="450" Width="800">
+	<Grid>
+		<TreeView>
+			<TreeViewItem Header="Level 1" IsExpanded="True">
+				<TreeViewItem Header="Level 2.1" />
+				<TreeViewItem Header="Level 2.2" IsExpanded="True">
+					<TreeViewItem Header="Level 3.1" />
+					<TreeViewItem Header="Level 3.2" />
+				</TreeViewItem>
+				<TreeViewItem Header="Level 2.3" />
+			</TreeViewItem>
+
+			<TreeViewItem >
+				<TreeViewItem.HeaderTemplate>
+					<DataTemplate>
+						<StackPanel Orientation="Horizontal"  Margin="0,8,0,8" >
+							<icon:PackIconFontAwesome Kind="ServerSolid" Height="24" Margin="8,0,8,0" />
+							<TextBlock Text="Server2" VerticalAlignment="Center"/>
+						</StackPanel>
+					</DataTemplate>
+				</TreeViewItem.HeaderTemplate>
+
+				<TreeViewItem >
+					<TreeViewItem.HeaderTemplate>
+						<DataTemplate>
+							<StackPanel Orientation="Horizontal" Margin="0,4,0,4">
+								<icon:PackIconFontAwesome Kind="DatabaseSolid" Height="24" Margin="8,0,8,0" />
+								<TextBlock Text="DB1" VerticalAlignment="Center"/>
+							</StackPanel>
+						</DataTemplate>
+					</TreeViewItem.HeaderTemplate>
+
+					<TreeViewItem >
+						<TreeViewItem.HeaderTemplate>
+							<DataTemplate>
+								<StackPanel Orientation="Horizontal" Margin="10,0,0,0"> 
+									<icon:PackIconFontAwesome Kind="PaperclipSolid" Height="24"  Margin="0,0,6,0" />
+									<TextBlock Text="aaa" VerticalAlignment="Center"></TextBlock>
+								</StackPanel>
+							</DataTemplate>
+						</TreeViewItem.HeaderTemplate>
+					</TreeViewItem>
+
+					<TreeViewItem >
+						<TreeViewItem.HeaderTemplate>
+							<DataTemplate>
+								<StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+									<icon:PackIconFontAwesome Kind="PaperclipSolid" Height="24"  Margin="0,0,6,0" />
+									<TextBlock Text="bbb" VerticalAlignment="Center"></TextBlock>
+								</StackPanel>
+							</DataTemplate>
+						</TreeViewItem.HeaderTemplate>
+					</TreeViewItem>
+
+					<TreeViewItem >
+						<TreeViewItem.HeaderTemplate>
+							<DataTemplate>
+								<StackPanel Orientation="Horizontal" Margin="10,0,0,0">
+									<icon:PackIconFontAwesome Kind="FolderRegular" Height="24"  Margin="0,0,6,0" />
+									<TextBlock Text="ccc" VerticalAlignment="Center"></TextBlock>
+								</StackPanel>
+							</DataTemplate>
+						</TreeViewItem.HeaderTemplate>
+
+
+						<TreeViewItem >
+							<TreeViewItem.HeaderTemplate>
+								<DataTemplate>
+									<StackPanel Orientation="Horizontal" Margin="0,0,0,0">
+										<icon:PackIconFontAwesome Kind="FolderRegular" Height="24"  Margin="0,0,6,0" />
+										<TextBlock Text="ccc-1" VerticalAlignment="Center"></TextBlock>
+									</StackPanel>
+								</DataTemplate>
+							</TreeViewItem.HeaderTemplate>
+						</TreeViewItem>
+
+					</TreeViewItem>
+
+				</TreeViewItem>
+				<TreeViewItem >
+					<TreeViewItem.HeaderTemplate>
+						<DataTemplate>
+							<StackPanel Orientation="Horizontal" Margin="0,4,0,4">
+								<icon:PackIconFontAwesome Kind="DatabaseSolid" Height="24" Margin="8,0,8,0" />
+								<TextBlock Text="DB2" VerticalAlignment="Center"/>
+							</StackPanel>
+						</DataTemplate>
+					</TreeViewItem.HeaderTemplate>
+				</TreeViewItem>
+				<TreeViewItem >
+					<TreeViewItem.HeaderTemplate>
+						<DataTemplate>
+							<StackPanel Orientation="Horizontal" Margin="0,4,0,4">
+								<icon:PackIconFontAwesome Kind="DatabaseSolid" Height="24" Margin="8,0,8,0" />
+								<TextBlock Text="DB3" VerticalAlignment="Center"/>
+							</StackPanel>
+						</DataTemplate>
+					</TreeViewItem.HeaderTemplate>
+				</TreeViewItem>
+
+			</TreeViewItem>
+			<TreeViewItem >
+				<TreeViewItem.HeaderTemplate>
+					<DataTemplate>
+						<StackPanel Orientation="Horizontal">
+							<icon:PackIconFontAwesome Kind="ServerSolid" Height="24" Margin="8,0,8,0" />
+							<TextBlock Text="Server1" VerticalAlignment="Center"/>
+						</StackPanel>
+					</DataTemplate>
+				</TreeViewItem.HeaderTemplate>
+			</TreeViewItem>
+			
+		</TreeView>
+	</Grid>
+</Window>

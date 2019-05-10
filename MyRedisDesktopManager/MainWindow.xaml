@@ -1,0 +1,161 @@
+﻿<Controls:MetroWindow
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+		xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+		xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+		xmlns:icon="http://metro.mahapps.com/winfx/xaml/iconpacks"
+		xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro" 
+		Dialog:DialogParticipation.Register="{Binding}" 
+		xmlns:local="clr-namespace:MyRedisDesktopManager" 
+		x:Class="MyRedisDesktopManager.MainWindow"
+		xmlns:viewModel="clr-namespace:MyRedisDesktopManager.ViewModels"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="600" Width="1000" 
+	GlowBrush="{DynamicResource AccentColorBrush}"
+		WindowStartupLocation="CenterScreen">
+	<Controls:MetroWindow.RightWindowCommands>
+		<Controls:WindowCommands>
+			<Button Content="Add Connection" Command="{Binding AddConnectionCommand}" />
+			<Button Content="Settings" Command="{Binding AppSettingCommand}"/>
+		</Controls:WindowCommands>
+	</Controls:MetroWindow.RightWindowCommands>
+
+	<Controls:MetroWindow.DataContext>
+		<viewModel:MainViewModel></viewModel:MainViewModel>
+	</Controls:MetroWindow.DataContext>
+
+	<!--Content-->
+	<Grid>
+		<Grid.ColumnDefinitions>
+			<ColumnDefinition Width="300" MinWidth="200"/>
+			<ColumnDefinition Width="*" MinWidth="200"/>
+		</Grid.ColumnDefinitions>
+
+
+
+		<Grid Grid.Column="0">
+			<TreeView Name="myTree" ItemsSource="{Binding Connects}"  >
+
+				<i:Interaction.Triggers>
+					<i:EventTrigger EventName="MouseDoubleClick">
+						<i:InvokeCommandAction Command="{Binding TreeviewSelectedItemChangedCommand}" CommandParameter="{Binding ElementName=myTree, Path=SelectedItem}"/>
+					</i:EventTrigger>
+				</i:Interaction.Triggers>
+
+				<TreeView.ItemTemplate>
+					<HierarchicalDataTemplate ItemsSource="{Binding Path=Databases}">
+
+						<!--  连接 -->
+						<StackPanel Orientation="Horizontal" Margin="0,8,0,8" Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType={x:Type TreeView}}}">
+							<icon:PackIconFontAwesome Kind="ServerSolid" Height="24" Margin="8,0,8,0">
+								<icon:PackIconFontAwesome.Style>
+									<Style TargetType="icon:PackIconFontAwesome"> 
+										<Style.Triggers>
+											<DataTrigger Binding="{Binding IsConnection}" Value="true">
+												<Setter Property="Foreground" Value="#333"/>
+											</DataTrigger>
+											<DataTrigger Binding="{Binding IsConnection}" Value="false">
+												<Setter Property="Foreground" Value="DarkGray"/>
+											</DataTrigger>
+											<DataTrigger Binding="{Binding IsLoading}" Value="true">
+												<Setter Property="Visibility" Value="Collapsed"/>
+											</DataTrigger>
+										</Style.Triggers>
+									</Style>
+								</icon:PackIconFontAwesome.Style>
+							</icon:PackIconFontAwesome>
+							<icon:PackIconFontAwesome Kind="SpinnerSolid" Height="24" Margin="8,0,8,0" Spin="True" Foreground="DarkGray" Visibility="{Binding Path=IsLoading, Converter={StaticResource booleanToVisibilityConverter}}" />
+							<TextBlock Text="{Binding Path=ConnectionSetting.Name}" VerticalAlignment="Center"/>
+
+							<!--  连接 右键菜单 -->
+							<StackPanel.ContextMenu>
+								<ContextMenu DataContext="{Binding RelativeSource={RelativeSource Self}, Path=PlacementTarget.Tag}" >
+									<MenuItem Header="Close Connection" Command="{Binding ConnectionClosedCommand}"  CommandParameter="{Binding Path=PlacementTarget.TemplatedParent.TemplatedParent.DataContext, 
+                           RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}"/>
+									<MenuItem Header="Edit Connection"  Command="{Binding ConnectionEditCommand }" CommandParameter="{Binding Path=PlacementTarget.TemplatedParent.TemplatedParent.DataContext, 
+                           RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}" ></MenuItem>
+									<MenuItem Header="Delete"  Command="{Binding ConnectionDeleteCommand }"  CommandParameter="{Binding Path=PlacementTarget.TemplatedParent.TemplatedParent.DataContext, 
+                           RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}"></MenuItem>
+								</ContextMenu>
+							</StackPanel.ContextMenu>
+						</StackPanel>
+
+						<HierarchicalDataTemplate.ItemTemplate>
+							<HierarchicalDataTemplate ItemsSource="{Binding Path=Keys}">
+
+								<!--  DB  -->
+								<StackPanel Orientation="Horizontal"  Margin="0,4,0,4">
+									<icon:PackIconFontAwesome Kind="SpinnerSolid" Height="24" Margin="0,0,6,0" Spin="True" Foreground="DarkGray" Visibility="{Binding Path=IsLoading, Converter={StaticResource booleanToVisibilityConverter}}" ></icon:PackIconFontAwesome>
+									<icon:PackIconFontAwesome Kind="DatabaseSolid" Height="24"  Margin="0,0,6,0" >
+										<icon:PackIconFontAwesome.Style>
+											<Style TargetType="icon:PackIconFontAwesome">
+												<Style.Triggers>
+													<DataTrigger Binding="{Binding HasLoadChidren}" Value="true">
+														<Setter Property="Foreground" Value="#333"/>
+													</DataTrigger>
+													<DataTrigger Binding="{Binding HasLoadChidren}" Value="false">
+														<Setter Property="Foreground" Value="DarkGray"/>
+													</DataTrigger>
+													<DataTrigger Binding="{Binding IsLoading}" Value="true">
+														<Setter Property="Visibility" Value="Collapsed"/>
+													</DataTrigger>
+												</Style.Triggers>
+											</Style>
+										</icon:PackIconFontAwesome.Style>
+									</icon:PackIconFontAwesome>
+									<TextBlock Text="{Binding Path=Index}" VerticalAlignment="Center"></TextBlock>
+									<TextBlock Text="{Binding Path=KeyCount, StringFormat='({0})'}" Margin="4,0,0,0" FontSize="10" VerticalAlignment="Center" Visibility="{Binding Path=HasLoadChidren, Converter={StaticResource booleanToVisibilityConverter}}"></TextBlock>
+
+									<!--  DB 右键菜单 -->
+									<StackPanel.ContextMenu>
+										<ContextMenu DataContext="{Binding RelativeSource={RelativeSource Self}, Path=PlacementTarget.Tag}" >
+											<MenuItem Header="Reload" Command="{Binding ConnectionClosedCommand}"  CommandParameter="{Binding Path=PlacementTarget.TemplatedParent.TemplatedParent.TemplatedParent.DataContext, 
+                           RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}"/>
+											<MenuItem Header="Filter Keys"  Command="{Binding ConnectionEditCommand }" CommandParameter="{Binding Path=PlacementTarget.TemplatedParent.TemplatedParent.TemplatedParent.DataContext, 
+                           RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}" ></MenuItem>
+											<MenuItem Header="Add Key"  Command="{Binding ConnectionDeleteCommand }"  CommandParameter="{Binding Path=PlacementTarget.TemplatedParent.TemplatedParent.TemplatedParent.DataContext, 
+                           RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}"></MenuItem>
+											<MenuItem Header="Flush DB"  Command="{Binding ConnectionDeleteCommand }"  CommandParameter="{Binding Path=PlacementTarget.TemplatedParent.TemplatedParent.TemplatedParent.DataContext, 
+                           RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}"></MenuItem>
+										</ContextMenu>
+									</StackPanel.ContextMenu>
+								</StackPanel>
+
+								<HierarchicalDataTemplate.ItemTemplate>
+									<HierarchicalDataTemplate ItemsSource="{Binding Path=Childrens}">
+										<StackPanel Orientation="Horizontal"  Margin="4,0,0,0">
+											<icon:PackIconFontAwesome Kind="PaperclipSolid" Height="24" Foreground="LightGray"  Margin="0,0,6,0" Visibility="{Binding Path=HasChildren, Converter={StaticResource invertedBooleanToVisibilityConverter}}" />
+
+											<icon:PackIconFontAwesome Kind="FolderRegular" Height="24"  Foreground="LightGray"  Margin="0,0,6,0"  Visibility="{Binding Path=HasChildren, Converter={StaticResource booleanToVisibilityConverter}}" />
+											
+											<TextBlock Text="{Binding Path=Name}" VerticalAlignment="Center"></TextBlock>
+											<TextBlock Text="{Binding Path=ChildrenCount, StringFormat='({0})'}" Visibility="{Binding Path=HasChildren, Converter={StaticResource booleanToVisibilityConverter}}" VerticalAlignment="Center" Margin="5,0,0,0" Foreground="SlateGray" FontSize="10"></TextBlock>
+											
+										</StackPanel>
+									</HierarchicalDataTemplate>
+								</HierarchicalDataTemplate.ItemTemplate>
+
+							</HierarchicalDataTemplate>
+
+						</HierarchicalDataTemplate.ItemTemplate>
+
+					</HierarchicalDataTemplate>
+
+				</TreeView.ItemTemplate>
+
+			</TreeView>
+ 
+		</Grid>
+		<GridSplitter Width="10"></GridSplitter>
+		<Grid Grid.Column="1" Margin="0">
+			<TextBlock Text="222"></TextBlock>
+
+			<Button Content="Button" HorizontalAlignment="Left" Margin="162,274,0,0" VerticalAlignment="Top" Width="75" Command="{Binding AddConnectionCommand}"/>
+
+
+		</Grid>
+
+	</Grid>
+</Controls:MetroWindow>
