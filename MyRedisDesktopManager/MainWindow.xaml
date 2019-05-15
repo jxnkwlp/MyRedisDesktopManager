@@ -13,19 +13,41 @@
 		xmlns:viewModel="clr-namespace:MyRedisDesktopManager.ViewModels"
 	xmlns:views="clr-namespace:MyRedisDesktopManager.Views"
         mc:Ignorable="d"
-        Title="MainWindow" Height="600" Width="1000" 
+        Title="Redis Desktop Manager" Height="600" Width="1000" 
 	GlowBrush="{DynamicResource AccentColorBrush}"
 		WindowStartupLocation="CenterScreen">
+
+	<Window.Resources>
+		<ResourceDictionary>
+			
+		</ResourceDictionary>
+	</Window.Resources>
+
 	<Controls:MetroWindow.RightWindowCommands>
 		<Controls:WindowCommands>
 			<Button Content="Add Connection" Command="{Binding AddConnectionCommand}" />
-			<Button Content="Settings" Command="{Binding AppSettingCommand}"/>
+			<Button Content="Settings" Command="{Binding AppSettingCommand}">
+			</Button>
+
+			<!--<Menu>
+				<MenuItem Header="Theme"
+                      ItemContainerStyle="{StaticResource AppThemeMenuItemStyle}"
+                      ItemsSource="{Binding AppThemes, Mode=OneWay}" />
+				<MenuItem Header="Accent"
+                      ItemContainerStyle="{StaticResource AccentColorMenuItemStyle}"
+                      ItemsSource="{Binding AccentColors, Mode=OneWay}" />
+			</Menu>-->
+
+			<!--<Controls:DropDownButton Content="Theme" IsExpanded="False" ></Controls:DropDownButton>-->
+			
 		</Controls:WindowCommands>
 	</Controls:MetroWindow.RightWindowCommands>
 
 	<Controls:MetroWindow.DataContext>
 		<viewModel:MainViewModel></viewModel:MainViewModel>
 	</Controls:MetroWindow.DataContext>
+
+	
 
 	<!--Content-->
 	<Grid>
@@ -160,8 +182,8 @@
 												<ContextMenu DataContext="{Binding Source={x:Reference myTree}, Path=DataContext}" >
 
 													<MenuItem Header="Copy Key" Command="{Binding KeyCopyCommand}" CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}" />
-													<MenuItem Header="Delete"  Command="{Binding KeyDeleteCommand}" CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}" /> 
-													
+													<MenuItem Header="Delete"  Command="{Binding KeyDeleteCommand}" CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}" />
+
 												</ContextMenu>
 											</StackPanel.ContextMenu>
 
@@ -185,11 +207,11 @@
 
 		<Grid Grid.Column="1" Margin="0">
 			<Grid Margin="0">
-				<Grid.RowDefinitions>
+				<!--<Grid.RowDefinitions>
 					<RowDefinition Height="*" MinHeight="100"/>
 					<RowDefinition Height="auto"/>
 					<RowDefinition Height="100" MinHeight="100"/>
-				</Grid.RowDefinitions>
+				</Grid.RowDefinitions>-->
 
 				<Grid Grid.Row="0">
 
@@ -201,7 +223,7 @@
 						<Controls:MetroTabControl.ItemContainerStyle>
 							<Style TargetType="{x:Type Controls:MetroTabItem}">
 								<Setter Property="Header" Value="{Binding Title, UpdateSourceTrigger=PropertyChanged}"/>
-								<Setter Property="Controls:MetroTabItem.CloseButtonEnabled" Value="True"/> 
+								<Setter Property="Controls:MetroTabItem.CloseButtonEnabled" Value="True"/>
 							</Style>
 						</Controls:MetroTabControl.ItemContainerStyle>
 
@@ -233,11 +255,11 @@
 
 				</Grid>
 
-				<GridSplitter Height="6" Grid.Row="1"  HorizontalAlignment="Stretch"/>
+				<!--<GridSplitter Height="6" Grid.Row="1"  HorizontalAlignment="Stretch"/>-->
 
-				<Grid Grid.Row="2">
+				<!--<Grid Grid.Row="2">
 					<TextBlock Text="333"></TextBlock>
-				</Grid>
+				</Grid>-->
 
 
 			</Grid>

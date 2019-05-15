@@ -38,9 +38,6 @@
     <Reference Include="ControlzEx, Version=3.0.2.4, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ControlzEx.3.0.2.4\lib\net45\ControlzEx.dll</HintPath>
     </Reference>
-    <Reference Include="csredis, Version=3.2.1.0, Culture=neutral, PublicKeyToken=1afd0264bbe4a44a, processorArchitecture=MSIL">
-      <HintPath>..\packages\csredis.3.2.1\lib\net40\csredis.dll</HintPath>
-    </Reference>
     <Reference Include="FluentValidation, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7de548da2fbae0f0, processorArchitecture=MSIL">
       <HintPath>..\packages\FluentValidation.8.3.0\lib\net45\FluentValidation.dll</HintPath>
     </Reference>
@@ -120,6 +117,7 @@
     <Compile Include="Models\RedisConnectModel.cs" />
     <Compile Include="Models\RedisKeyType.cs" />
     <Compile Include="ObservableRangeCollection.cs" />
+    <Compile Include="Services\RedisCommandLogWriter.cs" />
     <Compile Include="Services\RedisClientService.cs" />
     <Compile Include="Services\RedisService.cs" />
     <Compile Include="Services\SettingsService.cs" />

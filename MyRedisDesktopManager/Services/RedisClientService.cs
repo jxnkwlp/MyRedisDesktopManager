@@ -13,6 +13,7 @@ namespace MyRedisDesktopManager.Services
 		private static Dictionary<Guid, ConnectionMultiplexer> _connections = new Dictionary<Guid, ConnectionMultiplexer>();
 
 
+
 		public ConnectionMultiplexer GetClient(Guid guid)
 		{
 			if (_connections.ContainsKey(guid))
@@ -43,7 +44,7 @@ namespace MyRedisDesktopManager.Services
 
 			options.EndPoints.Add(settings.Host, settings.Port);
 
-			ConnectionMultiplexer connection = await ConnectionMultiplexer.ConnectAsync(options);
+			ConnectionMultiplexer connection = await ConnectionMultiplexer.ConnectAsync(options, RedisCommandLogWriter.Instance.Writer);
 
 			connection.ConnectionFailed += (sender, e) =>
 			{
@@ -105,7 +106,7 @@ namespace MyRedisDesktopManager.Services
 			var client = GetClient(guid);
 			var server = client.GetServer(client.GetEndPoints()[0]);
 
-			var keys = server.Keys(db, pattern);
+			var keys = server.Keys(db, pattern, 1000).ToList();
 
 			return keys.Select(t => t.ToString()).OrderBy(t => t).ToArray();
 		}
