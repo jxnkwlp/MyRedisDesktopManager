@@ -151,6 +151,39 @@ namespace MyRedisDesktopManager.Services
 
 			return result;
 		}
+
+
+		public async Task<bool> KeyRenameAsync(Guid guid, int db, string oldKey, string newKey)
+		{
+			var client = GetClient(guid);
+			var database = client.GetDatabase(db);
+
+			return await database.KeyRenameAsync(oldKey, newKey);
+		}
+
+		public async Task<bool> KeyDeleteAsync(Guid guid, int db, string key)
+		{
+			var client = GetClient(guid);
+			var database = client.GetDatabase(db);
+
+			return await database.KeyDeleteAsync(key);
+		}
+
+		public async Task<bool> KeyExpireAsync(Guid guid, int db, string key, TimeSpan? newTime)
+		{
+			var client = GetClient(guid);
+			var database = client.GetDatabase(db);
+
+			return await database.KeyExpireAsync(key, newTime);
+		}
+
+		public async Task<bool> StringSetAsync(Guid guid, int db, string key, string value)
+		{
+			var client = GetClient(guid);
+			var database = client.GetDatabase(db);
+
+			return await database.StringSetAsync(key, value);
+		}
 	}
 
 }

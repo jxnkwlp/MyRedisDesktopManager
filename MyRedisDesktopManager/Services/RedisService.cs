@@ -98,7 +98,7 @@ namespace MyRedisDesktopManager.Services
 			if (key.IndexOf(SPLITTER) > 0)
 			{
 				var name = key.Substring(0, key.IndexOf(SPLITTER));
-				var keyModel = new RedisDbKeyModel(db)
+				var keyModel = new RedisDbKeyModel(db, null)
 				{
 					FullKey = key,
 					Name = name,
@@ -111,14 +111,13 @@ namespace MyRedisDesktopManager.Services
 			}
 			else
 			{
-				return new RedisDbKeyModel(db)
+				return new RedisDbKeyModel(db, null)
 				{
 					FullKey = key,
 					Name = key,
 					KeyPrefix = key,
 				};
 			}
-
 		}
 
 		static void ResolveKey(RedisDbKeyModel currentKey)
@@ -149,7 +148,7 @@ namespace MyRedisDesktopManager.Services
 				nextName = nextPrefix.Remove(0, currentPrefix.Length + 1);
 			}
 
-			var nextKey = new RedisDbKeyModel(currentKey.RedisDb)
+			var nextKey = new RedisDbKeyModel(currentKey.RedisDb, currentKey)
 			{
 				FullKey = currentKey.FullKey,
 				KeyPrefix = nextPrefix,
@@ -180,6 +179,36 @@ namespace MyRedisDesktopManager.Services
 			value.RedisDbKey = key;
 
 			return value;
+		}
+
+		public async Task<bool> KeyRenameAsync(RedisDbKeyModel key, string newKey)
+		{
+			var db = key.RedisDb;
+
+			var result = await _redisClientService.KeyRenameAsync(db.RedisConnect.Guid, db.Index, key.FullKey, newKey);
+
+			return result;
+		}
+
+		public async Task<bool> KeyDeleteAsync(RedisDbKeyModel key)
+		{
+			var db = key.RedisDb;
+
+			return await _redisClientService.KeyDeleteAsync(db.RedisConnect.Guid, db.Index, key.FullKey);
+		}
+
+		public async Task<bool> SetKeyExpireAsync(RedisDbKeyModel key, TimeSpan? time)
+		{
+			var db = key.RedisDb;
+
+			return await _redisClientService.KeyExpireAsync(db.RedisConnect.Guid, db.Index, key.FullKey, time);
+		}
+
+		public async Task<bool> StringSetAsync(RedisDbKeyModel key, string text)
+		{
+			var db = key.RedisDb;
+
+			return await _redisClientService.StringSetAsync(db.RedisConnect.Guid, db.Index, key.FullKey, text);
 		}
 	}
 }

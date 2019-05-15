@@ -11,6 +11,7 @@
 		xmlns:local="clr-namespace:MyRedisDesktopManager" 
 		x:Class="MyRedisDesktopManager.MainWindow"
 		xmlns:viewModel="clr-namespace:MyRedisDesktopManager.ViewModels"
+	xmlns:views="clr-namespace:MyRedisDesktopManager.Views"
         mc:Ignorable="d"
         Title="MainWindow" Height="600" Width="1000" 
 	GlowBrush="{DynamicResource AccentColorBrush}"
@@ -37,7 +38,9 @@
 
 		<Grid Grid.Column="0" Margin="0,0,6,0">
 
-			<TreeView Name="myTree" ItemsSource="{Binding Connects}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"  >
+			<TreeView Name="myTree" ItemsSource="{Binding Connects}" 
+					  VirtualizingPanel.IsVirtualizing="True" 
+					  VirtualizingPanel.VirtualizationMode="Recycling"  >
 
 				<i:Interaction.Triggers>
 					<i:EventTrigger EventName="MouseDoubleClick">
@@ -126,12 +129,41 @@
 								<HierarchicalDataTemplate.ItemTemplate>
 									<HierarchicalDataTemplate ItemsSource="{Binding Path=Childrens}">
 										<StackPanel Orientation="Horizontal"  Margin="4,0,0,0">
-											<icon:PackIconFontAwesome Kind="PaperclipSolid" Height="24" Foreground="LightGray"  Margin="0,0,6,0" Visibility="{Binding Path=HasChildren, Converter={StaticResource invertedBooleanToVisibilityConverter}}" />
 
-											<icon:PackIconFontAwesome Kind="FolderRegular" Height="24"  Foreground="LightGray"  Margin="0,0,6,0"  Visibility="{Binding Path=HasChildren, Converter={StaticResource booleanToVisibilityConverter}}" />
+											<icon:PackIconFontAwesome Kind="PaperclipSolid" Height="24" Foreground="DarkGray"  Margin="0,0,6,0" Visibility="{Binding Path=HasChildren, Converter={StaticResource invertedBooleanToVisibilityConverter}}" />
+											<icon:PackIconFontAwesome Kind="FolderRegular" Height="24"  Foreground="DarkGray"  Margin="0,0,6,0"  Visibility="{Binding Path=HasChildren, Converter={StaticResource booleanToVisibilityConverter}}" />
 
-											<TextBlock Text="{Binding Path=Name}" VerticalAlignment="Center"></TextBlock>
+											<TextBlock Text="{Binding Path=Name}" VerticalAlignment="Center" >
+												<TextBlock.Style>
+													<Style TargetType="TextBlock">
+														<Style.Triggers>
+															<DataTrigger Binding="{Binding Deleted}" Value="false">
+																<Setter Property="Foreground" Value="Black" >
+																</Setter>
+															</DataTrigger>
+															<DataTrigger Binding="{Binding Deleted}" Value="true">
+																<Setter Property="Foreground" >
+																	<Setter.Value>
+																		<SolidColorBrush Color="Black" Opacity="0.2"/>
+																	</Setter.Value>
+																</Setter>
+															</DataTrigger>
+														</Style.Triggers>
+													</Style>
+												</TextBlock.Style>
+											</TextBlock>
 											<TextBlock Text="{Binding Path=ChildrenCount, StringFormat='({0})'}" Visibility="{Binding Path=HasChildren, Converter={StaticResource booleanToVisibilityConverter}}" VerticalAlignment="Center" Margin="5,0,0,0" Foreground="SlateGray" FontSize="10"></TextBlock>
+
+
+											<!--  KEY 右键菜单 -->
+											<StackPanel.ContextMenu>
+												<ContextMenu DataContext="{Binding Source={x:Reference myTree}, Path=DataContext}" >
+
+													<MenuItem Header="Copy Key" Command="{Binding KeyCopyCommand}" CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}" />
+													<MenuItem Header="Delete"  Command="{Binding KeyDeleteCommand}" CommandParameter="{Binding Path=PlacementTarget.DataContext, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}" /> 
+													
+												</ContextMenu>
+											</StackPanel.ContextMenu>
 
 										</StackPanel>
 									</HierarchicalDataTemplate>
@@ -163,13 +195,15 @@
 
 					<Controls:MetroTabControl xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls" 
 								ItemsSource="{Binding Tabs}" 
-											  Controls:TabControlHelper.CloseButtonEnabled="True"
+											  SelectedItem="{Binding TabSelect, Mode=TwoWay}"
+											   Controls:TabControlHelper.CloseButtonEnabled="True"
 												Controls:TabControlHelper.Underlined="TabPanel" >
-						<!--<TabControl.ItemContainerStyle>
-							<Style TargetType="{x:Type TabItem}">
-								<Setter Property="Header" Value="{Binding Title}" />
+						<Controls:MetroTabControl.ItemContainerStyle>
+							<Style TargetType="{x:Type Controls:MetroTabItem}">
+								<Setter Property="Header" Value="{Binding Title, UpdateSourceTrigger=PropertyChanged}"/>
+								<Setter Property="Controls:MetroTabItem.CloseButtonEnabled" Value="True"/> 
 							</Style>
-						</TabControl.ItemContainerStyle>-->
+						</Controls:MetroTabControl.ItemContainerStyle>
 
 						<!--<TabControl.ItemTemplate>
 							<DataTemplate>
@@ -177,15 +211,18 @@
 							</DataTemplate>
 						</TabControl.ItemTemplate>-->
 
-						<Controls:MetroTabControl.ItemTemplate>
-							<DataTemplate> 
-								<TextBlock Text="{Binding Title}"/>
+						<!--<Controls:MetroTabControl.ItemTemplate>
+							<DataTemplate>
+								<StackPanel Orientation="Horizontal">
+									<TextBlock Text="{Binding Title}" FontSize="16" VerticalAlignment="Center" />
+									<icon:PackIconOcticons Kind="X" Height="14" Margin="10,0,0,0" Foreground="PaleVioletRed"   />
+								</StackPanel>
 							</DataTemplate>
-						</Controls:MetroTabControl.ItemTemplate>
+						</Controls:MetroTabControl.ItemTemplate>-->
 
 						<TabControl.ContentTemplate>
 							<DataTemplate>
-								<TextBlock Text="{Binding KeyValue.Value}" />
+								<views:KeyValueView DataContext="{Binding}" />
 							</DataTemplate>
 						</TabControl.ContentTemplate>
 

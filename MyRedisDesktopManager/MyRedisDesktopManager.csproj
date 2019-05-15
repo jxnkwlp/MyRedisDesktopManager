@@ -112,6 +112,7 @@
     <Compile Include="Command.cs" />
     <Compile Include="Converters\InvertedBooleanToVisibilityConverter.cs" />
     <Compile Include="Converters\NotZeroToVisibilityConverter.cs" />
+    <Compile Include="JsonFormatHelper.cs" />
     <Compile Include="Models\ConnectionSettingModel.cs" />
     <Compile Include="Models\RedisDbKeyModel.cs" />
     <Compile Include="Models\RedisDbKeyValueModel.cs" />
@@ -139,6 +140,9 @@
     <Compile Include="Views\AppSettingView.xaml.cs">
       <DependentUpon>AppSettingView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\KeyValueView.xaml.cs">
+      <DependentUpon>KeyValueView.xaml</DependentUpon>
+    </Compile>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -160,6 +164,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\AppSettingView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\KeyValueView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

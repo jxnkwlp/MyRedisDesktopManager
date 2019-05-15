@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace MyRedisDesktopManager.ViewModels
@@ -21,6 +22,7 @@ namespace MyRedisDesktopManager.ViewModels
 		private readonly RedisService _redisService = new RedisService();
 
 		private object _selectedValuePath;
+		private KeyEditViewModel _tabSelect;
 
 		public ICommand AddConnectionCommand => new Command(async (s) => await AddConnectionAsync());
 
@@ -51,10 +53,15 @@ namespace MyRedisDesktopManager.ViewModels
 
 		#endregion
 
+		#region Key COntext Menu Command
+
+		public ICommand KeyCopyCommand => new Command<RedisDbKeyModel>(async (p) => await KeyCopyCommandExecuteAsync(p));
+
+		public ICommand KeyDeleteCommand => new Command<RedisDbKeyModel>(async (p) => await KeyDeleteCommandExecuteAsync(p));
+
+		#endregion
+
 		public ICommand TreeviewSelectedItemChangedCommand => new Command(async (s) => await TreeviewSelectedItemChangedAsync(s));
-
-
-
 
 		public object SelectedValuePath
 		{
@@ -68,6 +75,12 @@ namespace MyRedisDesktopManager.ViewModels
 		public ObservableRangeCollection<RedisConnectModel> Connects { get; set; } = new ObservableRangeCollection<RedisConnectModel>();
 
 		public ObservableCollection<KeyEditViewModel> Tabs { get; set; } = new ObservableCollection<KeyEditViewModel>();
+
+		public KeyEditViewModel TabSelect
+		{
+			get { return _tabSelect; }
+			set { _tabSelect = value; OnPropertyChanged(nameof(TabSelect)); }
+		}
 
 
 		public MainViewModel()
@@ -111,6 +124,8 @@ namespace MyRedisDesktopManager.ViewModels
 		{
 			if (o is RedisConnectModel model)
 			{
+				RemoveTabItems(model.Guid);
+
 				var dialog = new CustomDialog();
 
 				dialog.Content = new EditConnectionView()
@@ -154,6 +169,8 @@ namespace MyRedisDesktopManager.ViewModels
 				_redisService.RemoveConnection(model);
 
 				Connects.Remove(model);
+
+				RemoveTabItems(model.Guid);
 			}
 
 		}
@@ -168,6 +185,7 @@ namespace MyRedisDesktopManager.ViewModels
 				model.Databases.Clear();
 			}
 
+			RemoveTabItems(model.Guid);
 		}
 
 		private async Task TreeviewSelectedItemChangedAsync(object o)
@@ -253,12 +271,14 @@ namespace MyRedisDesktopManager.ViewModels
 
 		private async Task DatabaseReloadAsync(RedisConnectModel model)
 		{
+			RemoveTabItems(model.Guid);
 			await LoadDatabaseAsync(model, true);
 		}
 
 
 		private async Task DBReloadCommandExecuteAsync(RedisDbModel db)
 		{
+			RemoveTabItems(db.RedisConnect.Guid);
 			await LoadDBKeysAsync(db, true);
 		}
 
@@ -304,30 +324,216 @@ namespace MyRedisDesktopManager.ViewModels
 				}
 
 				db.IsLoading = false;
+
+				RemoveTabItems(db.RedisConnect.Guid);
 			}
 		}
 
 		private async Task LoadDBKeysValueAsync(RedisDbKeyModel key)
 		{
-			var id = key.RedisDb.RedisConnect.Guid + ":" + key.FullKey;
+			if (key.Deleted) return;
 
-			if (this.Tabs.Any(t => t.Id == id))
+			var id = key.RedisDb.RedisConnect.Guid + "_" + key.RedisDb.Index + "_" + key.FullKey;
+
+			var tabItem = this.Tabs.FirstOrDefault(t => t.Id.StartsWith(key.RedisDb.RedisConnect.Guid.ToString()));
+
+			var value = await LoadKeyValueAsync(key);
+
+			if (value.RedisType == RedisType.None)
+			{
+				await _dialogCoordinator.ShowMessageAsync(this, $"The Key '{key.FullKey}' not found. ", "");
+				return;
+			}
+			else if (value.RedisType == RedisType.Unknown)
+			{
+				await _dialogCoordinator.ShowMessageAsync(this, $"The Key '{key.FullKey}' type unsupport. ", "");
+				return;
+			}
+
+
+			if (tabItem == null)
+			{
+				tabItem = new KeyEditViewModel()
+				{
+					Id = id,
+					Title = key.RedisDb.RedisConnect.ConnectionSetting.Name + ":DB" + key.RedisDb.Index,
+
+					KeyValue = value,
+				};
+
+				tabItem.ReloadCommandAction = async () => await KeyValueReloadCommandAsync(key);
+				tabItem.RenameKeyCommandAction = async () => await KeyValueRenameKeyCommandActionAsync(key);
+				tabItem.DeleteKeyCommandAction = async () => await KeyValueDeleteKeyCommandActionAsync(key);
+				tabItem.UpdateTTLCommandAction = async () => await KeyValueUpdateTTLCommandActionAsync(key);
+				tabItem.UpdateValueCommandAction = async (newText) => await KeyValueUpdateValueCommandActionAsync(key, newText);
+
+
+				this.Tabs.Add(tabItem);
+				this.TabSelect = tabItem;
+			}
+			else
+			{
+				tabItem.Id = id;
+				tabItem.Title = key.RedisDb.RedisConnect.ConnectionSetting.Name + ":DB" + key.RedisDb.Index;
+				tabItem.KeyValue = value;
+
+				this.TabSelect = tabItem;
+			}
+
+		}
+
+
+		private async Task<RedisDbKeyValueModel> LoadKeyValueAsync(RedisDbKeyModel key)
+		{
+			var value = await _redisService.GetKeyValueAsync(key);
+			return value;
+		}
+
+		private async Task KeyValueReloadCommandAsync(RedisDbKeyModel key)
+		{
+			if (key.Deleted)
+				return;
+
+			var progress = await _dialogCoordinator.ShowProgressAsync(this, "Title", "Loading ...", true);
+
+			var id = key.KeyId;
+			var tabItem = this.Tabs.FirstOrDefault(t => t.Id.StartsWith(key.RedisDb.RedisConnect.Guid.ToString()));
+
+			if (tabItem == null)
+			{
+				await progress.CloseAsync();
+				return;
+			}
+
+			try
+			{
+				var value = await LoadKeyValueAsync(key);
+
+				tabItem.KeyValue = value;
+
+				await progress.CloseAsync();
+			}
+			catch (Exception ex)
+			{
+				await progress.CloseAsync().ContinueWith(async (_) =>
+				{
+					await _dialogCoordinator.ShowMessageAsync(this, "Title", ex.Message);
+				});
+
+			}
+
+		}
+
+		private async Task KeyValueRenameKeyCommandActionAsync(RedisDbKeyModel key)
+		{
+			var id = key.KeyId;
+			var tabItem = this.Tabs.FirstOrDefault(t => t.Id.StartsWith(key.RedisDb.RedisConnect.Guid.ToString()));
+
+			var input = await _dialogCoordinator.ShowInputAsync(this, "Please input new key", "", new MetroDialogSettings() { DefaultText = key.FullKey, });
+
+			if (string.IsNullOrWhiteSpace(input))
 			{
 				return;
 			}
 
-			var value = await _redisService.GetKeyValueAsync(key);
+			var result = await _redisService.KeyRenameAsync(key, input);
 
-			var tabItem = new KeyEditViewModel()
+			if (result)
 			{
-				Id = id,
-				Title = key.RedisDb.RedisConnect.ConnectionSetting.Name + ":" + key.FullKey,
-
-				KeyValue = value,
-			};
-
-			this.Tabs.Add(tabItem);
+				if (tabItem != null)
+				{
+					this.Tabs.Remove(tabItem);
+				}
+			}
+			else
+			{
+				await _dialogCoordinator.ShowMessageAsync(this, "Rename key faild", "");
+			}
 		}
 
+		private async Task KeyValueDeleteKeyCommandActionAsync(RedisDbKeyModel key)
+		{
+			var id = key.KeyId;
+
+			var dialog = await _dialogCoordinator.ShowMessageAsync(this, "Action confirm", "Are you sure delete the key?", MessageDialogStyle.AffirmativeAndNegative);
+
+			if (dialog == MessageDialogResult.Affirmative)
+			{
+				var result = await _redisService.KeyDeleteAsync(key);
+				if (result)
+				{
+					key.Remove();
+
+					// if in tabitem 
+					var tabItem = this.Tabs.FirstOrDefault(t => t.Id.StartsWith(key.RedisDb.RedisConnect.Guid.ToString()));
+
+					if (tabItem != null)
+					{
+						this.Tabs.Remove(tabItem);
+					}
+				}
+				else
+				{
+					await _dialogCoordinator.ShowMessageAsync(this, "Delete key faild", "");
+				}
+			}
+		}
+
+		private async Task KeyValueUpdateTTLCommandActionAsync(RedisDbKeyModel key)
+		{
+			var id = key.KeyId;
+			var tabItem = this.Tabs.FirstOrDefault(t => t.Id.StartsWith(key.RedisDb.RedisConnect.Guid.ToString()));
+
+			if (tabItem == null)
+			{
+				await _dialogCoordinator.ShowMessageAsync(this, "The key not found", "");
+				return;
+			}
+
+			var input = await _dialogCoordinator.ShowInputAsync(this, "Set new TTL", "", new MetroDialogSettings() { DefaultText = tabItem.KeyValue.TTL.ToString(), });
+
+			if (string.IsNullOrWhiteSpace(input))
+			{
+				return;
+			}
+
+			if (int.TryParse(input, out int newTTL))
+			{
+				await _redisService.SetKeyExpireAsync(key, (newTTL <= 0 ? TimeSpan.Zero : TimeSpan.FromSeconds(newTTL)));
+
+				await KeyValueReloadCommandAsync(key);
+			}
+		}
+
+		private async Task KeyValueUpdateValueCommandActionAsync(RedisDbKeyModel key, string newText)
+		{
+			await _redisService.StringSetAsync(key, newText);
+
+			await KeyValueReloadCommandAsync(key);
+		}
+
+		private Task KeyCopyCommandExecuteAsync(RedisDbKeyModel key)
+		{
+			Clipboard.SetText(key.KeyPrefix);
+
+			return Task.CompletedTask;
+		}
+
+		private async Task KeyDeleteCommandExecuteAsync(RedisDbKeyModel key)
+		{
+			if (key.Deleted) return;
+
+			await KeyValueDeleteKeyCommandActionAsync(key);
+		}
+
+		private void RemoveTabItems(Guid guid)
+		{
+			var tabs = this.Tabs.Where(t => t.Id.StartsWith(guid.ToString())).ToList();
+
+			foreach (var item in tabs)
+			{
+				this.Tabs.Remove(item);
+			}
+		}
 	}
 }
