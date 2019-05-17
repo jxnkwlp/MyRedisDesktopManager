@@ -2,26 +2,18 @@
 using MyRedisDesktopManager.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
 namespace MyRedisDesktopManager.ViewModels
 {
-	public class KeyEditViewModel : ViewModelBase
+	public class KeyEditViewModel : TabItemViewModel
 	{
 		private readonly IDialogCoordinator _dialogCoordinator;
 
 		private RedisDbKeyValueModel _keyValue;
 		private int _viewTypeSelect = 1;
 		private string _resultViewText;
-		private string _title;
-
-		public string Id { get; set; }
-
-		public string Title { get => _title; set { _title = value; OnPropertyChanged(nameof(Title)); } }
 
 
 		public RedisDbKeyValueModel KeyValue
@@ -30,15 +22,11 @@ namespace MyRedisDesktopManager.ViewModels
 			set { _keyValue = value; OnPropertyChanged(nameof(KeyValue)); RenderResultText(); }
 		}
 
-
-
-
 		public string ResultViewText
 		{
 			get { return _resultViewText; }
 			set { _resultViewText = value; OnPropertyChanged(nameof(ResultViewText)); }
 		}
-
 
 		public int ViewTypeSelect
 		{

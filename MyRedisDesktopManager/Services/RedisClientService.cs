@@ -44,7 +44,7 @@ namespace MyRedisDesktopManager.Services
 
 			options.EndPoints.Add(settings.Host, settings.Port);
 
-			ConnectionMultiplexer connection = await ConnectionMultiplexer.ConnectAsync(options, RedisCommandLogWriter.Instance.Writer);
+			ConnectionMultiplexer connection = await ConnectionMultiplexer.ConnectAsync(options);
 
 			connection.ConnectionFailed += (sender, e) =>
 			{

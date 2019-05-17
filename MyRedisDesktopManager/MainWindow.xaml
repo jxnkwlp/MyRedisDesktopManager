@@ -106,6 +106,12 @@
                            RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}" ></MenuItem>
 									<MenuItem Header="Delete"  Command="{Binding ConnectionDeleteCommand }"  CommandParameter="{Binding Path=PlacementTarget.TemplatedParent.TemplatedParent.DataContext, 
                            RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}"></MenuItem>
+
+									<MenuItem Header="Server Info"  Command="{Binding ConnectionServerInfoCommand }"  CommandParameter="{Binding Path=PlacementTarget.TemplatedParent.TemplatedParent.DataContext, 
+                           RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}"></MenuItem>
+									<MenuItem Header="Console"  Command="{Binding ConnectionOpenConsoleCommand }"  CommandParameter="{Binding Path=PlacementTarget.TemplatedParent.TemplatedParent.DataContext, 
+                           RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type ContextMenu}}}"></MenuItem>
+
 								</ContextMenu>
 							</StackPanel.ContextMenu>
 						</StackPanel>
@@ -206,12 +212,13 @@
 		<GridSplitter Width="6" />
 
 		<Grid Grid.Column="1" Margin="0">
+ 
 			<Grid Margin="0">
-				<!--<Grid.RowDefinitions>
+				<Grid.RowDefinitions>
 					<RowDefinition Height="*" MinHeight="100"/>
 					<RowDefinition Height="auto"/>
-					<RowDefinition Height="100" MinHeight="100"/>
-				</Grid.RowDefinitions>-->
+					<RowDefinition Height="200" MinHeight="100"/>
+				</Grid.RowDefinitions>
 
 				<Grid Grid.Row="0">
 
@@ -226,40 +233,24 @@
 								<Setter Property="Controls:MetroTabItem.CloseButtonEnabled" Value="True"/>
 							</Style>
 						</Controls:MetroTabControl.ItemContainerStyle>
-
-						<!--<TabControl.ItemTemplate>
-							<DataTemplate>
-								<TextBlock Text="{Binding Title}"/>
-							</DataTemplate>
-						</TabControl.ItemTemplate>-->
-
-						<!--<Controls:MetroTabControl.ItemTemplate>
-							<DataTemplate>
-								<StackPanel Orientation="Horizontal">
-									<TextBlock Text="{Binding Title}" FontSize="16" VerticalAlignment="Center" />
-									<icon:PackIconOcticons Kind="X" Height="14" Margin="10,0,0,0" Foreground="PaleVioletRed"   />
-								</StackPanel>
-							</DataTemplate>
-						</Controls:MetroTabControl.ItemTemplate>-->
-
+ 
 						<TabControl.ContentTemplate>
 							<DataTemplate>
 								<views:KeyValueView DataContext="{Binding}" />
 							</DataTemplate>
 						</TabControl.ContentTemplate>
-
-						<!--<Controls:MetroTabItem Header="111" CloseButtonEnabled="True" />
-						<Controls:MetroTabItem Header="2222"  CloseButtonEnabled="True"/>-->
-
+ 
 					</Controls:MetroTabControl>
 
 				</Grid>
 
-				<!--<GridSplitter Height="6" Grid.Row="1"  HorizontalAlignment="Stretch"/>-->
+				<GridSplitter Height="6" Grid.Row="1"  HorizontalAlignment="Stretch"/>
 
-				<!--<Grid Grid.Row="2">
-					<TextBlock Text="333"></TextBlock>
-				</Grid>-->
+				<Grid Grid.Row="2">
+					
+					<views:ConsoleView />
+					
+				</Grid>
 
 
 			</Grid>

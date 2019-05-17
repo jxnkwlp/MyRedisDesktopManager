@@ -131,7 +131,12 @@
     <Compile Include="ViewModels\EditConnectionViewModel.cs" />
     <Compile Include="ViewModels\KeyEditViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
+    <Compile Include="ViewModels\ServerInfoTableItem.cs" />
+    <Compile Include="ViewModels\TabItemViewModel.cs" />
     <Compile Include="ViewModels\ViewModelBase.cs" />
+    <Compile Include="Views\ConsoleView.xaml.cs">
+      <DependentUpon>ConsoleView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\EditConnectionView.xaml.cs">
       <DependentUpon>EditConnectionView.xaml</DependentUpon>
     </Compile>
@@ -154,6 +159,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="test.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ConsoleView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
